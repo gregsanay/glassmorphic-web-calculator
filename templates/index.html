@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows Fluent Calculator</title>
+    <!-- Google Fonts for modern typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=Segoe+UI:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome for UI icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="calculator-container">
+        <!-- Left Navigation Drawer -->
+        <div class="nav-drawer collapsed" id="nav-drawer">
+            <div class="nav-drawer-header">
+                <button class="icon-btn" id="nav-close-btn" title="Close Menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <span class="app-title">Calculator</span>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item active" data-mode="standard" id="nav-standard"><i class="fa-solid fa-calculator"></i> Standard</li>
+                <li class="nav-item" data-mode="scientific" id="nav-scientific"><i class="fa-solid fa-flask"></i> Scientific</li>
+                <li class="nav-item" data-mode="programmer" id="nav-programmer"><i class="fa-solid fa-terminal"></i> Programmer</li>
+                <li class="nav-item" data-mode="date" id="nav-date"><i class="fa-solid fa-calendar-days"></i> Date Calculation</li>
+                <li class="divider"></li>
+                <li class="nav-item" data-mode="settings" id="nav-settings"><i class="fa-solid fa-gear"></i> Settings</li>
+            </ul>
+        </div>
+        <!-- Left Navigation Drawer Overlay -->
+        <div class="nav-overlay hidden" id="nav-overlay"></div>
+
+        <!-- Main Calculator Layout -->
+        <main class="calculator-app">
+            <!-- Header Bar -->
+            <header class="app-header">
+                <div class="header-left">
+                    <button class="icon-btn menu-toggle" id="menu-btn" title="Open Navigation Menu">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <span class="app-title">Standard</span>
+                    <button class="icon-btn keep-top" title="Keep on top">
+                        <i class="fa-solid fa-up-right-from-square"></i>
+                    </button>
+                </div>
+                <div class="header-right">
+                    <button class="icon-btn history-toggle-btn" id="sidebar-toggle" title="History (Ctrl+H)">
+                        <i class="fa-solid fa-clock-rotate-left"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Calculator Display Area -->
+            <section class="calculator-display" id="display-area">
+                <div class="display-history" id="expression-display"></div>
+                <div class="display-main" id="input-display">0</div>
+            </section>
+
+            <!-- Date Calculation Panel (Hidden by default) -->
+            <section class="date-calculator-panel hidden" id="date-calculator-panel">
+                <!-- Sub-mode Selector Dropdown -->
+                <div class="date-mode-selector">
+                    <select id="date-calc-type" class="fluent-select">
+                        <option value="difference">Difference between dates</option>
+                        <option value="add-subtract">Add or subtract days</option>
+                    </select>
+                </div>
+
+                <!-- Mode 1: Difference between dates -->
+                <div class="date-sub-panel" id="date-diff-panel">
+                    <div class="date-input-group">
+                        <label class="fluent-label">From</label>
+                        <input type="date" id="date-diff-from" class="fluent-date-input">
+                    </div>
+                    <div class="date-input-group">
+                        <label class="fluent-label">To</label>
+                        <input type="date" id="date-diff-to" class="fluent-date-input">
+                    </div>
+                    <div class="date-result-box" id="date-diff-result-box">
+                        <span class="fluent-label">Difference</span>
+                        <div class="date-result-primary" id="date-diff-result-primary">Same date</div>
+                        <div class="date-result-secondary" id="date-diff-result-secondary">0 days</div>
+                    </div>
+                </div>
+
+                <!-- Mode 2: Add or subtract days -->
+                <div class="date-sub-panel hidden" id="date-add-sub-panel">
+                    <div class="date-input-group">
+                        <label class="fluent-label">From</label>
+                        <input type="date" id="date-add-sub-from" class="fluent-date-input">
+                    </div>
+                    <div class="date-radio-group">
+                        <label class="fluent-radio-label">
+                            <input type="radio" name="date-op-type" value="add" checked>
+                            <span class="custom-radio"></span> Add
+                        </label>
+                        <label class="fluent-radio-label">
+                            <input type="radio" name="date-op-type" value="subtract">
+                            <span class="custom-radio"></span> Subtract
+                        </label>
+                    </div>
+                    <div class="date-duration-inputs">
+                        <div class="duration-field">
+                            <label class="fluent-label">Years</label>
+                            <input type="number" id="date-years" min="0" max="999" value="0" class="fluent-num-input">
+                        </div>
+                        <div class="duration-field">
+                            <label class="fluent-label">Months</label>
+                            <input type="number" id="date-months" min="0" max="999" value="0" class="fluent-num-input">
+                        </div>
+                        <div class="duration-field">
+                            <label class="fluent-label">Days</label>
+                            <input type="number" id="date-days" min="0" max="999" value="0" class="fluent-num-input">
+                        </div>
+                    </div>
+                    <div class="date-result-box">
+                        <span class="fluent-label">Date</span>
+                        <div class="date-result-primary" id="date-add-sub-result">Friday, September 25, 2026</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Programmer Base Selection and Readouts (Hidden by default) -->
+            <input type="checkbox" id="programmer-base-toggle" class="base-toggle-checkbox">
+            <label for="programmer-base-toggle" class="base-toggle-label" id="base-toggle-label">
+                <span>Base Readouts</span>
+                <i class="fa-solid fa-chevron-down"></i>
+            </label>
+            <section class="programmer-base-panel hidden" id="programmer-base-panel">
+                <div class="base-row" data-base="HEX" id="base-hex">
+                    <span class="base-label">HEX</span>
+                    <span class="base-value" id="val-hex">0</span>
+                </div>
+                <div class="base-row active" data-base="DEC" id="base-dec">
+                    <span class="base-label">DEC</span>
+                    <span class="base-value" id="val-dec">0</span>
+                </div>
+                <div class="base-row" data-base="OCT" id="base-oct">
+                    <span class="base-label">OCT</span>
+                    <span class="base-value" id="val-oct">0</span>
+                </div>
+                <div class="base-row" data-base="BIN" id="base-bin">
+                    <span class="base-label">BIN</span>
+                    <span class="base-value" id="val-bin">0</span>
+                </div>
+            </section>
+
+            <!-- Programmer Header Bar (Word size & Bit Keyboard toggle) -->
+            <section class="programmer-header-bar hidden" id="programmer-header-bar">
+                <button class="word-size-btn" id="word-size-toggle" data-tooltip="Word size (QWORD/DWORD/WORD/BYTE)">QWORD</button>
+                <button class="icon-btn" id="bit-keyboard-toggle" data-tooltip="Toggle 64-bit keyboard">
+                    <i class="fa-solid fa-table-cells-large"></i>
+                </button>
+            </section>
+
+            <!-- Interactive Bit Keyboard Grid (Hidden by default) -->
+            <section class="bit-keyboard-grid hidden" id="bit-keyboard-grid"></section>
+
+            <!-- Memory Key Bar -->
+            <section class="memory-bar">
+                <button class="mem-btn" id="mem-mc" data-tooltip="Memory Clear (MC)" disabled>MC</button>
+                <button class="mem-btn" id="mem-mr" data-tooltip="Memory Recall (MR)" disabled>MR</button>
+                <button class="mem-btn" id="mem-mplus" data-tooltip="Memory Add (M+)">M+</button>
+                <button class="mem-btn" id="mem-mminus" data-tooltip="Memory Subtract (M-)">M-</button>
+                <button class="mem-btn" id="mem-ms" data-tooltip="Memory Store (MS)">MS</button>
+                <button class="mem-btn" id="mem-mshow" data-tooltip="Show Memory (Mv)" disabled>M<sup>v</sup></button>
+            </section>
+
+            <!-- Standard Keypad Grid -->
+            <section class="keypad-grid standard-grid" id="standard-grid">
+                <!-- Row 1: Special Operators -->
+                <button class="key-btn op-btn" id="key-percent" data-val="%" data-tooltip="Percentage (%)">%</button>
+                <button class="key-btn op-btn" id="key-ce" data-action="CE" data-tooltip="Clear Entry (CE)">CE</button>
+                <button class="key-btn op-btn" id="key-c" data-action="C" data-tooltip="Clear All (C)">C</button>
+                <button class="key-btn op-btn" id="key-backspace" data-action="backspace" data-tooltip="Backspace (⌫)"><i class="fa-solid fa-backspace"></i></button>
+
+                <!-- Row 2: Advanced Functions -->
+                <button class="key-btn op-btn" id="key-reciprocal" data-fn="1/x" data-tooltip="Reciprocal (1/x)"><sup>1</sup>/<sub>x</sub></button>
+                <button class="key-btn op-btn" id="key-square" data-fn="x^2" data-tooltip="Square (x²)">x<sup>2</sup></button>
+                <button class="key-btn op-btn" id="key-sqrt" data-fn="sqrt" data-tooltip="Square Root (2√x)"><sup>2</sup>&radic;x</button>
+                <button class="key-btn op-btn math-op" id="key-divide" data-op="÷" data-tooltip="Divide (÷)">&divide;</button>
+
+                <!-- Row 3: Numbers & Multiplication -->
+                <button class="key-btn num-btn" data-val="7">7</button>
+                <button class="key-btn num-btn" data-val="8">8</button>
+                <button class="key-btn num-btn" data-val="9">9</button>
+                <button class="key-btn math-op" id="key-multiply" data-op="×" data-tooltip="Multiply (×)">&times;</button>
+
+                <!-- Row 4: Numbers & Subtraction -->
+                <button class="key-btn num-btn" data-val="4">4</button>
+                <button class="key-btn num-btn" data-val="5">5</button>
+                <button class="key-btn num-btn" data-val="6">6</button>
+                <button class="key-btn math-op" id="key-subtract" data-op="-" data-tooltip="Subtract (−)">&minus;</button>
+
+                <!-- Row 5: Numbers & Addition -->
+                <button class="key-btn num-btn" data-val="1">1</button>
+                <button class="key-btn num-btn" data-val="2">2</button>
+                <button class="key-btn num-btn" data-val="3">3</button>
+                <button class="key-btn math-op" id="key-add" data-op="+" data-tooltip="Add (+)">+</button>
+
+                <!-- Row 6: Negation, Zero, Decimal, Equals -->
+                <button class="key-btn num-btn" id="key-negate" data-action="negate" data-tooltip="Negate (±)">&plusmn;</button>
+                <button class="key-btn num-btn" data-val="0">0</button>
+                <button class="key-btn num-btn" id="key-decimal" data-val="." data-tooltip="Decimal Point (.)">.</button>
+                <button class="key-btn action-btn" id="key-equals" data-action="equals" data-tooltip="Calculate (=)">=</button>
+            </section>
+
+            <!-- Scientific Keypad Grid (5-column premium layout) -->
+            <section class="keypad-grid scientific-grid hidden" id="scientific-grid">
+                <!-- Row 1: Trig / Constants -->
+                <button class="key-btn op-btn math-func-btn" data-fn="sin" data-tooltip="Sine (sin)">sin</button>
+                <button class="key-btn op-btn math-func-btn" data-fn="cos" data-tooltip="Cosine (cos)">cos</button>
+                <button class="key-btn op-btn math-func-btn" data-fn="tan" data-tooltip="Tangent (tan)">tan</button>
+                <button class="key-btn op-btn num-constant-btn" data-val="pi" data-tooltip="Pi (π)">π</button>
+                <button class="key-btn op-btn num-constant-btn" data-val="e" data-tooltip="Euler's Constant (e)">e</button>
+
+                <!-- Row 2: Logs & Exponents -->
+                <button class="key-btn op-btn math-func-btn" data-fn="ln" data-tooltip="Natural Logarithm (ln)">ln</button>
+                <button class="key-btn op-btn math-func-btn" data-fn="log" data-tooltip="Logarithm Base 10 (log)">log</button>
+                <button class="key-btn op-btn math-func-btn" data-op="^" data-tooltip="Power (xʸ)">x<sup>y</sup></button>
+                <button class="key-btn op-btn math-func-btn" data-fn="x^3" data-tooltip="Cube (x³)">x<sup>3</sup></button>
+                <button class="key-btn op-btn math-func-btn" data-fn="factorial" data-tooltip="Factorial (n!)">n!</button>
+
+                <!-- Row 3: Pow 2, Sqrt, Recip, CE, Back -->
+                <button class="key-btn op-btn math-func-btn" data-fn="x^2" data-tooltip="Square (x²)">x<sup>2</sup></button>
+                <button class="key-btn op-btn math-func-btn" data-fn="sqrt" data-tooltip="Square Root (2√x)"><sup>2</sup>&radic;x</button>
+                <button class="key-btn op-btn math-func-btn" data-fn="1/x" data-tooltip="Reciprocal (1/x)"><sup>1</sup>/<sub>x</sub></button>
+                <button class="key-btn op-btn" data-action="CE" data-tooltip="Clear Entry (CE)">CE</button>
+                <button class="key-btn op-btn" data-action="backspace" data-tooltip="Backspace (⌫)"><i class="fa-solid fa-backspace"></i></button>
+
+                <!-- Row 4: Digits 7,8,9, Divide, Clear All -->
+                <button class="key-btn num-btn" data-val="7">7</button>
+                <button class="key-btn num-btn" data-val="8">8</button>
+                <button class="key-btn num-btn" data-val="9">9</button>
+                <button class="key-btn math-op" data-op="÷" data-tooltip="Divide (÷)">&divide;</button>
+                <button class="key-btn op-btn" data-action="C" data-tooltip="Clear All (C)">C</button>
+
+                <!-- Row 5: Digits 4,5,6, Multiply, Percent -->
+                <button class="key-btn num-btn" data-val="4">4</button>
+                <button class="key-btn num-btn" data-val="5">5</button>
+                <button class="key-btn num-btn" data-val="6">6</button>
+                <button class="key-btn math-op" data-op="×" data-tooltip="Multiply (×)">&times;</button>
+                <button class="key-btn op-btn" data-val="%" data-tooltip="Percentage (%)">%</button>
+
+                <!-- Row 6: Digits 1,2,3, Subtract, Negate -->
+                <button class="key-btn num-btn" data-val="1">1</button>
+                <button class="key-btn num-btn" data-val="2">2</button>
+                <button class="key-btn num-btn" data-val="3">3</button>
+                <button class="key-btn math-op" data-op="-" data-tooltip="Subtract (−)">&minus;</button>
+                <button class="key-btn num-btn" data-action="negate" data-tooltip="Negate (±)">&plusmn;</button>
+
+                <!-- Row 7: Digit 0, Decimal, Add, Equals (span 2) -->
+                <button class="key-btn num-btn" data-val="0">0</button>
+                <button class="key-btn num-btn" data-val="." data-tooltip="Decimal Point (.)">.</button>
+                <button class="key-btn math-op" data-op="+" data-tooltip="Add (+)">+</button>
+                <button class="key-btn action-btn" id="key-sci-equals" data-action="equals" data-tooltip="Calculate (=)" style="grid-column: span 2;">=</button>
+            </section>
+
+            <!-- Programmer Keypad Grid (Hidden by default) -->
+            <section class="keypad-grid programmer-grid hidden" id="programmer-grid">
+                <!-- Row 1: A, Lsh, CE, C, Backspace, Mod -->
+                <button class="key-btn hex-btn num-btn" data-val="A" data-tooltip="Hex Digit A">A</button>
+                <button class="key-btn op-btn bitwise-btn" data-op="<<" data-tooltip="Left Shift (<<)">Lsh</button>
+                <button class="key-btn op-btn" data-action="CE" data-tooltip="Clear Entry (CE)">CE</button>
+                <button class="key-btn op-btn" data-action="C" data-tooltip="Clear All (C)">C</button>
+                <button class="key-btn op-btn" data-action="backspace" data-tooltip="Backspace (⌫)"><i class="fa-solid fa-backspace"></i></button>
+                <button class="key-btn op-btn math-op" data-op="%" data-tooltip="Modulo (%)">Mod</button>
+
+                <!-- Row 2: B, Rsh, 7, 8, 9, Divide -->
+                <button class="key-btn hex-btn num-btn" data-val="B" data-tooltip="Hex Digit B">B</button>
+                <button class="key-btn op-btn bitwise-btn" data-op=">>" data-tooltip="Right Shift (>>)">Rsh</button>
+                <button class="key-btn num-btn" data-val="7">7</button>
+                <button class="key-btn num-btn" data-val="8">8</button>
+                <button class="key-btn num-btn" data-val="9">9</button>
+                <button class="key-btn math-op" data-op="÷" data-tooltip="Divide (÷)">&divide;</button>
+
+                <!-- Row 3: C, OR, 4, 5, 6, Multiply -->
+                <button class="key-btn hex-btn num-btn" data-val="C" data-tooltip="Hex Digit C">C</button>
+                <button class="key-btn op-btn bitwise-btn" data-op="|" data-tooltip="Bitwise OR (|)">Or</button>
+                <button class="key-btn num-btn" data-val="4">4</button>
+                <button class="key-btn num-btn" data-val="5">5</button>
+                <button class="key-btn num-btn" data-val="6">6</button>
+                <button class="key-btn math-op" data-op="×" data-tooltip="Multiply (×)">&times;</button>
+
+                <!-- Row 4: D, XOR, 1, 2, 3, Subtract -->
+                <button class="key-btn hex-btn num-btn" data-val="D" data-tooltip="Hex Digit D">D</button>
+                <button class="key-btn op-btn bitwise-btn" data-op="^" data-tooltip="Bitwise XOR (^)">Xor</button>
+                <button class="key-btn num-btn" data-val="1">1</button>
+                <button class="key-btn num-btn" data-val="2">2</button>
+                <button class="key-btn num-btn" data-val="3">3</button>
+                <button class="key-btn math-op" data-op="-" data-tooltip="Subtract (−)">&minus;</button>
+
+                <!-- Row 5: E, AND, (, 0, ), Add -->
+                <button class="key-btn hex-btn num-btn" data-val="E" data-tooltip="Hex Digit E">E</button>
+                <button class="key-btn op-btn bitwise-btn" data-op="&" data-tooltip="Bitwise AND (&)">And</button>
+                <button class="key-btn op-btn" data-val="(" data-tooltip="Open Parenthesis">(</button>
+                <button class="key-btn num-btn" data-val="0">0</button>
+                <button class="key-btn op-btn" data-val=")" data-tooltip="Close Parenthesis">)</button>
+                <button class="key-btn math-op" data-op="+" data-tooltip="Add (+)">+</button>
+
+                <!-- Row 6: F, NOT, Negate, Equals (span 3) -->
+                <button class="key-btn hex-btn num-btn" data-val="F" data-tooltip="Hex Digit F">F</button>
+                <button class="key-btn op-btn bitwise-btn" data-action="~" data-tooltip="Bitwise NOT (~)">Not</button>
+                <button class="key-btn num-btn" data-action="negate" data-tooltip="Negate (±)">&plusmn;</button>
+                <button class="key-btn action-btn" id="key-prog-equals" data-action="equals" data-tooltip="Calculate (=)" style="grid-column: span 3;">=</button>
+            </section>
+        </main>
+
+        <!-- Sidebar Panel for History and Memory -->
+        <aside class="sidebar-panel collapsed" id="sidebar">
+            <header class="sidebar-header">
+                <nav class="sidebar-tabs">
+                    <button class="tab-btn active" id="tab-history">History</button>
+                    <button class="tab-btn" id="tab-memory">Memory</button>
+                </nav>
+                <button class="icon-btn" id="sidebar-close-btn" title="Close Sidebar">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </header>
+
+            <section class="sidebar-content">
+                <!-- History Container -->
+                <div class="tab-content active-content" id="history-container">
+                    <div class="empty-state" id="history-empty">There's no history yet</div>
+                    <ul class="history-list" id="history-list">
+                        <!-- History Items go here -->
+                    </ul>
+                    <footer class="sidebar-footer">
+                        <button class="icon-btn clear-sidebar-btn" id="clear-history" title="Clear History">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </footer>
+                </div>
+
+                <!-- Memory Container -->
+                <div class="tab-content" id="memory-container">
+                    <div class="empty-state" id="memory-empty">There's nothing saved in memory</div>
+                    <ul class="memory-list" id="memory-list">
+                        <!-- Memory Items go here -->
+                    </ul>
+                </div>
+            </section>
+        </aside>
+
+        <!-- Settings Modal (Fluent Glassmorphic popup modal) -->
+        <div class="modal-overlay hidden" id="settings-modal">
+            <div class="settings-modal-card">
+                <div class="settings-modal-header">
+                    <h3>Settings</h3>
+                    <button class="icon-btn" id="settings-close-btn" title="Close Settings">&times;</button>
+                </div>
+                <div class="settings-modal-body">
+                    <div class="setting-group">
+                        <label class="setting-label"><i class="fa-solid fa-palette"></i> Choose Theme</label>
+                        <div class="toggle-group">
+                            <label class="radio-label">
+                                <input type="radio" name="theme-radio" value="dark" checked>
+                                <span class="custom-radio"></span> Dark Theme
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="theme-radio" value="light">
+                                <span class="custom-radio"></span> Light Theme
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <label class="setting-label"><i class="fa-solid fa-angle-left"></i> Trig Angle Unit</label>
+                        <div class="toggle-group">
+                            <label class="radio-label">
+                                <input type="radio" name="trig-radio" value="degrees" checked>
+                                <span class="custom-radio"></span> Degrees
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="trig-radio" value="radians">
+                                <span class="custom-radio"></span> Radians
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <label class="setting-label"><i class="fa-solid fa-bullseye"></i> Decimal Precision</label>
+                        <div class="toggle-group">
+                            <label class="radio-label">
+                                <input type="radio" name="prec-radio" value="auto" checked>
+                                <span class="custom-radio"></span> Auto
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="prec-radio" value="2">
+                                <span class="custom-radio"></span> 2 Places
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="prec-radio" value="4">
+                                <span class="custom-radio"></span> 4 Places
+                            </label>
+                        </div>
+                    </div>
+
+                    <button class="settings-save-btn" id="settings-save-btn">Save & Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Script -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
