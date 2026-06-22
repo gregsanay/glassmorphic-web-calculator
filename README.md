@@ -58,7 +58,7 @@ This project heavily utilizes the principles of Glassmorphism to create a premiu
 
 ## 📸 Screenshots
 
-*(Add your beautiful screenshots here demonstrating the Glassmorphism effect in both Dark and Light themes!)*
+*(To be uploaded!)*
 
 ## 📄 License
 
