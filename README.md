@@ -57,8 +57,22 @@ This project heavily utilizes the principles of Glassmorphism to create a premiu
 5.  **Access the app:** Open your web browser and navigate to `http://127.0.0.1:5000/`
 
 ## 📸 Screenshots
-
-*(To be uploaded!)*
+<img width="867" height="677" alt="Basic calc dark" src="https://github.com/user-attachments/assets/cdbb1a4f-2e7f-4b36-818a-e981a2485085" />
+*(Basic Dark Mode)*
+<img width="867" height="677" alt="Basic calc white" src="https://github.com/user-attachments/assets/a6b3da07-6238-4406-b4d5-85e699cbdb3a" />
+*(Basic Light Mode)*
+<img width="867" height="677" alt="Scientific calc dark" src="https://github.com/user-attachments/assets/5df8bacc-064e-4610-ab47-e69913eec306" />
+*(Scientific Dark Mode)*
+<img width="867" height="677" alt="Scientific calc light" src="https://github.com/user-attachments/assets/ff0098eb-b897-4d6b-8b85-3f4725d0bc76" />
+*(Scientific Light Mode)*
+<img width="867" height="677" alt="Programmers calc dark" src="https://github.com/user-attachments/assets/657c9926-d77e-4e03-bda3-16baade8a43a" />
+*(Programmer Dark Mode)*
+<img width="867" height="677" alt="Programmers calc light" src="https://github.com/user-attachments/assets/7112f526-072e-4e19-b62b-782802bb46fc" />
+*(Programmer Light Mode)*
+<img width="498" height="684" alt="Date calc dark" src="https://github.com/user-attachments/assets/a070aa95-4396-4403-907d-f0838cea99e8" />
+*(Date Calculation Dark Mode)*
+<img width="498" height="684" alt="Date calc light" src="https://github.com/user-attachments/assets/c48dd0ec-a0d7-4453-a46e-7bfcf2e1cb94" />
+*(Date Calculation Light Mode)*
 
 ## 📄 License
 
